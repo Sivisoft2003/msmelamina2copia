@@ -7,7 +7,7 @@ SECRET_KEY = 'django-insecure-&^&*#@%$^&*()_+=-0987654321!@#$%^&*()_+'
 
 DEBUG = False
 
-ALLOWED_HOSTS = ['sivisoft.pythonanywhere.com', '127.0.0.1', 'localhost']
+ALLOWED_HOSTS = ['sivisoft.pythonanywhere.com', '127.0.0.1', 'localhost', '.fly.dev',]
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
