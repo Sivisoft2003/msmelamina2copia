@@ -1,9 +1,8 @@
 ﻿FROM python:3.10-slim
 
-# Establecer directorio de trabajo dentro del contenedor
 WORKDIR /app
 
-# Instalar dependencias del sistema (necesario para Pillow)
+# Instalar dependencias del sistema
 RUN apt-get update && apt-get install -y \
     python3-dev \
     libjpeg-dev \
@@ -12,27 +11,24 @@ RUN apt-get update && apt-get install -y \
     zlib1g-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Copiar el archivo de dependencias
+# Instalar dependencias de Python
 COPY requirements.txt .
-
-# Instalar las dependencias de Python
 RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
 
-# Copiar todo el código del proyecto
+# Copiar código
 COPY . .
 
-# Recolectar archivos estáticos
+# 🔥 EJECUTAR EN ESTE ORDEN:
+# 1. Recolectar estáticos
 RUN python manage.py collectstatic --noinput
 
-# Exponer el puerto (el que usa Render)
-EXPOSE 8000
+# 🔥 2. Primero migrar (crear tablas)
+RUN python manage.py migrate
 
-# Comando para iniciar la aplicación
-CMD ["gunicorn", "config.wsgi:application", "--bind", "0.0.0.0:8000"]
-
-# Crear superusuario automáticamente
+# 🔥 3. Luego crear superusuario (después de las migraciones)
 RUN python create_superuser.py
 
-# Comando de inicio
+EXPOSE 8000
+
 CMD ["gunicorn", "config.wsgi:application", "--bind", "0.0.0.0:8000"]
