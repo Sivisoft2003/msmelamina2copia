@@ -1,0 +1,27 @@
+﻿{% extends 'base/base.html' %}
+
+{% block title %}Usuarios - M&S Melamina{% endblock %}
+
+{% block content %}
+<h1>Usuarios</h1>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Usuario</th>
+            <th>Email</th>
+            <th>Activo</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for user in users %}
+        <tr>
+            <td>{{ user.username }}</td>
+            <td>{{ user.email }}</td>
+            <td>{% if user.is_active %}✅{% else %}❌{% endif %}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="3">No hay usuarios</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

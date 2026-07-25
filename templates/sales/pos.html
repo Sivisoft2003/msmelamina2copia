@@ -1,0 +1,621 @@
+﻿{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Punto de Venta - M&S Melamina{% endblock %}
+
+{% block extra_css %}
+<style>
+    .pos-container {
+        height: calc(100vh - 120px);
+    }
+    .product-grid {
+        max-height: 500px;
+        overflow-y: auto;
+    }
+    .product-item {
+        cursor: pointer;
+        transition: all 0.2s;
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
+        padding: 10px;
+        margin: 5px;
+        text-align: center;
+    }
+    .product-item:hover {
+        background-color: #f8f9fa;
+        border-color: #3498db;
+        transform: scale(1.02);
+    }
+    .product-item .price {
+        color: #28a745;
+        font-weight: bold;
+    }
+    .product-item .stock {
+        font-size: 0.8rem;
+        color: #6c757d;
+    }
+    .cart-item {
+        border-bottom: 1px solid #e9ecef;
+        padding: 8px 0;
+    }
+    .cart-item:last-child {
+        border-bottom: none;
+    }
+    .qty-control {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .qty-control button {
+        width: 25px;
+        height: 25px;
+        border: 1px solid #ced4da;
+        border-radius: 4px;
+        background: white;
+        cursor: pointer;
+    }
+    .qty-control button:hover {
+        background: #e9ecef;
+    }
+    .qty-control span {
+        min-width: 30px;
+        text-align: center;
+        font-weight: bold;
+    }
+    .cart-total {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 8px;
+        margin-top: 10px;
+    }
+    .cliente-section {
+        background: #f8f9fa;
+        padding: 10px;
+        border-radius: 8px;
+        margin-top: 10px;
+    }
+    .payment-section {
+        background: #e8f4fd;
+        padding: 10px;
+        border-radius: 8px;
+        margin-top: 10px;
+    }
+    .vuelto-display {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #28a745;
+    }
+    .form-check-input:checked {
+        background-color: #28a745;
+        border-color: #28a745;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<input type="hidden" id="csrf-token" value="{{ csrf_token }}">
+
+<div class="pos-container">
+    <div class="row h-100">
+        <!-- Panel izquierdo: Productos -->
+        <div class="col-md-7">
+            <div class="card h-100">
+                <div class="card-header">
+                    <div class="row align-items-center">
+                        <div class="col-md-12">
+                            <div class="search-box">
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-search"></i></span>
+                                    <input type="text" 
+                                           id="product-search" 
+                                           class="form-control" 
+                                           placeholder="Buscar por nombre o código de barras..."
+                                           oninput="buscarProductos(this.value)">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-12 mt-2">
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-barcode"></i></span>
+                                <input type="text" 
+                                       id="barcode-input" 
+                                       class="form-control" 
+                                       placeholder="Código de barras"
+                                       autofocus>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body product-grid" id="product-list">
+                    <div class="text-center text-muted py-5">
+                        <i class="fas fa-search fa-3x mb-3"></i>
+                        <p>Busca un producto para comenzar</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Panel derecho: Carrito -->
+        <div class="col-md-5">
+            <div class="card h-100">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="fas fa-shopping-cart"></i> Carrito</h5>
+                        <div>
+                            <span class="badge bg-info" id="item-count">0 items</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body" style="overflow-y: auto; max-height: 400px;">
+                    <div id="cart-items">
+                        <div class="text-center text-muted py-4">
+                            <i class="fas fa-cart-plus fa-3x mb-2"></i>
+                            <p>Carrito vacío</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <!-- Totales -->
+                    <div class="cart-total">
+                        <div class="row">
+                            <div class="col-6">Subtotal:</div>
+                            <div class="col-6 text-end" id="subtotal">Bs. 0.00</div>
+                        </div>
+                        <div class="row" id="tax-row">
+                            <div class="col-6">IVA (16%):</div>
+                            <div class="col-6 text-end" id="tax">Bs. 0.00</div>
+                        </div>
+                        <div class="row">
+                            <div class="col-6">Descuento:</div>
+                            <div class="col-6 text-end">
+                                <input type="number" id="discount-input" class="form-control form-control-sm" value="0" step="0.01">
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="row">
+                            <div class="col-6"><strong>Total:</strong></div>
+                            <div class="col-6 text-end"><strong id="total">Bs. 0.00</strong></div>
+                        </div>
+                    </div>
+
+                    <!-- Opciones de Facturación -->
+                    <div class="mt-2">
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="invoice_type" id="sin_iva" value="SIN_IVA" checked>
+                            <label class="form-check-label" for="sin_iva">Sin IVA</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="invoice_type" id="con_iva" value="CON_IVA">
+                            <label class="form-check-label" for="con_iva">Con Factura (16%)</label>
+                        </div>
+                    </div>
+
+                    <!-- Cotización -->
+                    <div class="form-check mt-1">
+                        <input class="form-check-input" type="checkbox" id="is_quotation">
+                        <label class="form-check-label" for="is_quotation">
+                            <i class="fas fa-file-alt"></i> Es Cotización/Proforma (No afecta stock)
+                        </label>
+                    </div>
+
+                    <!-- Datos del Cliente -->
+                    <div class="cliente-section">
+                        <h6><i class="fas fa-user"></i> Datos del Cliente</h6>
+                        <div class="row">
+                            <div class="col-12 mb-1">
+                                <input type="text" id="customer-name" class="form-control form-control-sm" placeholder="Nombre del cliente">
+                            </div>
+                            <div class="col-6">
+                                <input type="text" id="customer-nit" class="form-control form-control-sm" placeholder="NIT/CI">
+                            </div>
+                            <div class="col-6">
+                                <input type="text" id="customer-phone" class="form-control form-control-sm" placeholder="Teléfono">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Método de Pago y Vuelto -->
+                    <div class="payment-section">
+                        <h6><i class="fas fa-credit-card"></i> Método de Pago</h6>
+                        <div class="row">
+                            <div class="col-12">
+                                <select id="payment-method" class="form-select form-select-sm">
+                                    <option value="EFECTIVO">Efectivo</option>
+                                    <option value="TARJETA">Tarjeta</option>
+                                    <option value="CREDITO">Crédito</option>
+                                    <option value="QR">QR / Transferencia</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row mt-1" id="payment-amount-row">
+                            <div class="col-6">
+                                <input type="number" id="amount-paid" class="form-control form-control-sm" placeholder="Monto pagado" step="0.01">
+                            </div>
+                            <div class="col-6">
+                                <div class="vuelto-display">
+                                    Vuelto: <span id="change-amount">Bs. 0.00</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Botones -->
+                    <div class="d-grid gap-2 mt-2">
+                        <button class="btn btn-success btn-lg" id="process-sale-btn" disabled>
+                            <i class="fas fa-check"></i> Procesar Venta
+                        </button>
+                        <button class="btn btn-danger" id="clear-cart-btn">
+                            <i class="fas fa-trash"></i> Limpiar Carrito
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let cart = [];
+    let cartSubtotal = 0;
+
+    // 🔍 BÚSQUEDA DE PRODUCTOS
+    function buscarProductos(query) {
+        const productList = document.getElementById('product-list');
+        
+        if (query.length < 2) {
+            productList.innerHTML = `
+                <div class="text-center text-muted py-5">
+                    <i class="fas fa-search fa-3x mb-3"></i>
+                    <p>Busca un producto para comenzar</p>
+                </div>
+            `;
+            return;
+        }
+
+        fetch(`/sales/api/search/?q=${encodeURIComponent(query)}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.length === 0) {
+                    productList.innerHTML = `
+                        <div class="text-center text-muted py-5">
+                            <i class="fas fa-box-open fa-3x mb-3"></i>
+                            <p>No se encontraron productos</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                let html = '<div class="row">';
+                data.forEach(product => {
+                    html += `
+                        <div class="col-md-4 col-lg-3">
+                            <div class="product-item" 
+                                 onclick="addToCart(${product.id}, '${product.name}', ${product.sale_price}, ${product.current_stock})">
+                                <strong>${product.name}</strong>
+                                <br>
+                                <span class="price">Bs. ${product.sale_price.toFixed(2)}</span>
+                                <br>
+                                <span class="stock">Stock: ${product.current_stock}</span>
+                            </div>
+                        </div>
+                    `;
+                });
+                html += '</div>';
+                productList.innerHTML = html;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                productList.innerHTML = `
+                    <div class="text-center text-danger py-5">
+                        <i class="fas fa-exclamation-triangle fa-3x mb-3"></i>
+                        <p>Error al buscar productos</p>
+                    </div>
+                `;
+            });
+    }
+
+    // 📷 BÚSQUEDA POR CÓDIGO DE BARRAS
+    document.getElementById('barcode-input').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            const barcode = this.value.trim();
+            if (barcode) {
+                fetch(`/sales/api/barcode/?barcode=${barcode}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (!data.error) {
+                            addToCart(data.id, data.name, data.sale_price, data.current_stock);
+                            this.value = '';
+                            this.focus();
+                        } else {
+                            alert('Producto no encontrado');
+                            this.value = '';
+                            this.focus();
+                        }
+                    });
+            }
+        }
+    });
+
+    // ➕ AGREGAR AL CARRITO
+    function addToCart(id, name, price, stock) {
+        const isQuotation = document.getElementById('is_quotation').checked;
+        
+        // Solo verificar stock si NO es cotización
+        if (!isQuotation) {
+            const existing = cart.find(item => item.id === id);
+            if (existing) {
+                if (existing.quantity < stock) {
+                    existing.quantity += 1;
+                    existing.total = existing.quantity * existing.price;
+                } else {
+                    alert('Stock insuficiente');
+                    return;
+                }
+            } else {
+                if (stock <= 0) {
+                    alert('Producto sin stock');
+                    return;
+                }
+                cart.push({
+                    id: id,
+                    name: name,
+                    price: price,
+                    quantity: 1,
+                    total: price,
+                    stock: stock
+                });
+            }
+        } else {
+            // Cotización: no verificar stock
+            const existing = cart.find(item => item.id === id);
+            if (existing) {
+                existing.quantity += 1;
+                existing.total = existing.quantity * existing.price;
+            } else {
+                cart.push({
+                    id: id,
+                    name: name,
+                    price: price,
+                    quantity: 1,
+                    total: price,
+                    stock: 9999 // Stock ilimitado para cotizaciones
+                });
+            }
+        }
+        updateCart();
+    }
+
+    // 🔄 ACTUALIZAR CARRITO
+    function updateCart() {
+        const cartContainer = document.getElementById('cart-items');
+        const subtotalEl = document.getElementById('subtotal');
+        const taxEl = document.getElementById('tax');
+        const totalEl = document.getElementById('total');
+        const processBtn = document.getElementById('process-sale-btn');
+        const itemCount = document.getElementById('item-count');
+
+        if (cart.length === 0) {
+            cartContainer.innerHTML = `
+                <div class="text-center text-muted py-4">
+                    <i class="fas fa-cart-plus fa-3x mb-2"></i>
+                    <p>Carrito vacío</p>
+                </div>
+            `;
+            subtotalEl.textContent = 'Bs. 0.00';
+            taxEl.textContent = 'Bs. 0.00';
+            totalEl.textContent = 'Bs. 0.00';
+            processBtn.disabled = true;
+            itemCount.textContent = '0 items';
+            return;
+        }
+
+        let html = '';
+        cartSubtotal = 0;
+        let totalItems = 0;
+        cart.forEach((item, index) => {
+            cartSubtotal += item.total;
+            totalItems += item.quantity;
+            html += `
+                <div class="cart-item">
+                    <div class="row align-items-center">
+                        <div class="col-6">
+                            <strong>${item.name}</strong>
+                            <br>
+                            <small>${item.price.toFixed(2)} Bs.</small>
+                        </div>
+                        <div class="col-4">
+                            <div class="qty-control">
+                                <button onclick="updateQuantity(${index}, -1)">-</button>
+                                <span>${item.quantity}</span>
+                                <button onclick="updateQuantity(${index}, 1)">+</button>
+                            </div>
+                        </div>
+                        <div class="col-2 text-end">
+                            <strong>${item.total.toFixed(2)}</strong>
+                            <br>
+                            <span class="btn-remove-item" onclick="removeItem(${index})">
+                                <i class="fas fa-trash"></i>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+
+        cartContainer.innerHTML = html;
+        itemCount.textContent = `${totalItems} items`;
+
+        // Calcular descuento
+        const discount = parseFloat(document.getElementById('discount-input').value) || 0;
+        
+        // Calcular IVA según selección
+        const invoiceType = document.querySelector('input[name="invoice_type"]:checked').value;
+        const taxRate = invoiceType === 'CON_IVA' ? 0.16 : 0;
+        const tax = cartSubtotal * taxRate;
+        const total = cartSubtotal + tax - discount;
+
+        subtotalEl.textContent = `Bs. ${cartSubtotal.toFixed(2)}`;
+        taxEl.textContent = `Bs. ${tax.toFixed(2)}`;
+        totalEl.textContent = `Bs. ${total.toFixed(2)}`;
+
+        processBtn.disabled = false;
+        calcularVuelto();
+    }
+
+    // ➖ ACTUALIZAR CANTIDAD
+    function updateQuantity(index, delta) {
+        const item = cart[index];
+        const newQty = item.quantity + delta;
+        if (newQty <= 0) {
+            removeItem(index);
+            return;
+        }
+        const isQuotation = document.getElementById('is_quotation').checked;
+        if (!isQuotation && newQty > item.stock) {
+            alert('Stock insuficiente');
+            return;
+        }
+        item.quantity = newQty;
+        item.total = item.quantity * item.price;
+        updateCart();
+    }
+
+    // 🗑️ ELIMINAR ITEM
+    function removeItem(index) {
+        cart.splice(index, 1);
+        updateCart();
+    }
+
+    // 🧹 LIMPIAR CARRITO
+    document.getElementById('clear-cart-btn').addEventListener('click', function() {
+        if (cart.length === 0) return;
+        if (confirm('¿Limpiar todo el carrito?')) {
+            cart = [];
+            updateCart();
+        }
+    });
+
+    // 💰 DESCUENTO
+    document.getElementById('discount-input').addEventListener('input', updateCart);
+
+    // 💵 CALCULAR VUELTO
+    document.getElementById('amount-paid').addEventListener('input', calcularVuelto);
+
+    function calcularVuelto() {
+        const totalText = document.getElementById('total').textContent;
+        const total = parseFloat(totalText.replace('Bs. ', '')) || 0;
+        const amountPaid = parseFloat(document.getElementById('amount-paid').value) || 0;
+        const change = amountPaid - total;
+        document.getElementById('change-amount').textContent = change >= 0 ? `Bs. ${change.toFixed(2)}` : 'Bs. 0.00';
+    }
+
+    // 🏷️ CAMBIO DE TIPO DE FACTURA
+    document.querySelectorAll('input[name="invoice_type"]').forEach(el => {
+        el.addEventListener('change', updateCart);
+    });
+
+    // 📄 COTIZACIÓN
+    document.getElementById('is_quotation').addEventListener('change', function() {
+        const isQuotation = this.checked;
+        document.getElementById('payment-amount-row').style.display = isQuotation ? 'none' : 'flex';
+        document.querySelector('.payment-section').style.opacity = isQuotation ? '0.5' : '1';
+        document.getElementById('process-sale-btn').innerHTML = isQuotation ? 
+            '<i class="fas fa-file-alt"></i> Generar Cotización' : 
+            '<i class="fas fa-check"></i> Procesar Venta';
+        updateCart();
+    });
+
+    // 💳 PROCESAR VENTA
+    document.getElementById('process-sale-btn').addEventListener('click', function() {
+        if (cart.length === 0) {
+            alert('El carrito está vacío');
+            return;
+        }
+
+        const isQuotation = document.getElementById('is_quotation').checked;
+        const discount = parseFloat(document.getElementById('discount-input').value) || 0;
+        const invoiceType = document.querySelector('input[name="invoice_type"]:checked').value;
+        const taxRate = invoiceType === 'CON_IVA' ? 0.16 : 0;
+        const tax = cartSubtotal * taxRate;
+        const total = cartSubtotal + tax - discount;
+
+        const amountPaid = parseFloat(document.getElementById('amount-paid').value) || 0;
+        const changeAmount = amountPaid - total;
+
+        const csrfToken = document.getElementById('csrf-token').value;
+
+        const data = {
+            items: cart.map(item => ({
+                id: item.id,
+                quantity: item.quantity,
+                price: item.price,
+                total: item.total
+            })),
+            subtotal: cartSubtotal,
+            discount: discount,
+            tax: tax,
+            total: total,
+            payment_method: document.getElementById('payment-method').value,
+            amount_paid: isQuotation ? 0 : amountPaid,
+            change_amount: isQuotation ? 0 : changeAmount,
+            customer_name: document.getElementById('customer-name').value,
+            customer_phone: document.getElementById('customer-phone').value,
+            customer_nit: document.getElementById('customer-nit').value,
+            is_quotation: isQuotation,
+            invoice_type: invoiceType,
+            notes: ''
+        };
+
+        this.disabled = true;
+        this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Procesando...';
+
+        fetch('/sales/api/process/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const urlRecibo = `/sales/recibo/${data.sale_id}/`;
+                window.open(urlRecibo, '_blank');
+                
+                alert(`✅ ${isQuotation ? 'Cotización' : 'Venta'} completada!\n\nNúmero: ${data.sale_number}\nTotal: Bs. ${data.total.toFixed(2)}`);
+                cart = [];
+                updateCart();
+                document.getElementById('customer-name').value = '';
+                document.getElementById('customer-phone').value = '';
+                document.getElementById('customer-nit').value = '';
+                document.getElementById('amount-paid').value = '';
+                document.getElementById('discount-input').value = '0';
+                const searchInput = document.getElementById('product-search');
+                if (searchInput.value.length >= 2) {
+                    buscarProductos(searchInput.value);
+                }
+            } else {
+                alert('❌ Error al procesar:\n' + data.error);
+            }
+        })
+        .catch(error => {
+            alert('❌ Error de conexión:\n' + error);
+        })
+        .finally(() => {
+            this.disabled = false;
+            this.innerHTML = isQuotation ? 
+                '<i class="fas fa-file-alt"></i> Generar Cotización' : 
+                '<i class="fas fa-check"></i> Procesar Venta';
+        });
+    });
+
+    // 🚀 Inicializar
+    document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('product-search').focus();
+        document.getElementById('payment-amount-row').style.display = 'flex';
+    });
+</script>
+{% endblock %}

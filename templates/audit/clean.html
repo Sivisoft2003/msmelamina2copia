@@ -1,0 +1,39 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Limpiar Logs - M&S Melamina{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-6 mx-auto">
+        <div class="card">
+            <div class="card-header bg-warning">
+                <h4><i class="fas fa-broom"></i> Limpiar Logs Antiguos</h4>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    Esta acción eliminará permanentemente los registros de auditoría antiguos.
+                </div>
+                
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label">Días a conservar</label>
+                        <input type="number" name="dias" class="form-control" value="90" min="1" max="365">
+                        <small class="text-muted">Registros más antiguos que esto serán eliminados</small>
+                    </div>
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-warning btn-lg">
+                            <i class="fas fa-broom"></i> Limpiar
+                        </button>
+                        <a href="{% url 'audit:list' %}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Cancelar
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

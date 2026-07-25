@@ -1,0 +1,53 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Anular Venta - M&S Melamina{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-6 mx-auto">
+        <div class="card border-danger">
+            <div class="card-header bg-danger text-white">
+                <h4><i class="fas fa-exclamation-triangle"></i> Anular Venta</h4>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-warning">
+                    <i class="fas fa-info-circle"></i>
+                    <strong>¿Estás seguro de anular esta venta?</strong>
+                    <p class="mt-2 mb-0">Esta acción:</p>
+                    <ul>
+                        <li>Cambiará el estado de la venta a <strong>ANULADA</strong></li>
+                        <li>Devolverá el stock de los productos</li>
+                        <li>No se puede deshacer</li>
+                    </ul>
+                </div>
+
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <p><strong>Número de Venta:</strong> {{ sale.sale_number }}</p>
+                        <p><strong>Fecha:</strong> {{ sale.date|date:"d/m/Y H:i" }}</p>
+                        <p><strong>Cliente:</strong> {{ sale.customer_name|default:"Consumidor Final" }}</p>
+                        <p><strong>Total:</strong> <strong class="text-danger">Bs. {{ sale.total|floatformat:2 }}</strong></p>
+                    </div>
+                </div>
+
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label">Motivo de Anulación *</label>
+                        <textarea name="motivo" class="form-control" rows="3" required placeholder="Explica el motivo de la anulación..."></textarea>
+                    </div>
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-danger btn-lg">
+                            <i class="fas fa-times"></i> Confirmar Anulación
+                        </button>
+                        <a href="{% url 'sales:detail' sale.pk %}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Volver
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

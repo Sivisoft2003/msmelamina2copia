@@ -1,0 +1,181 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Configuración - M&S Melamina{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="fas fa-cog"></i> Configuración de la Empresa</h1>
+    <a href="{% url 'core:dashboard' %}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Volver
+    </a>
+</div>
+
+<div class="row">
+    <div class="col-md-10 mx-auto">
+        <div class="card">
+            <div class="card-header">
+                <ul class="nav nav-tabs card-header-tabs" id="settingsTabs">
+                    <li class="nav-item">
+                        <a class="nav-link active" data-bs-toggle="tab" href="#empresa">
+                            <i class="fas fa-building"></i> Empresa
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" data-bs-toggle="tab" href="#financiero">
+                            <i class="fas fa-coins"></i> Financiero
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" data-bs-toggle="tab" href="#recibos">
+                            <i class="fas fa-receipt"></i> Recibos
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" data-bs-toggle="tab" href="#inventario">
+                            <i class="fas fa-warehouse"></i> Inventario
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    
+                    <div class="tab-content">
+                        <!-- Tab Empresa -->
+                        <div class="tab-pane fade show active" id="empresa">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">Nombre de la Empresa</label>
+                                        {{ form.company_name }}
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">NIT</label>
+                                        {{ form.nit }}
+                                    </div>
+                                </div>
+                                <div class="col-md-12">
+                                    <div class="mb-3">
+                                        <label class="form-label">Dirección</label>
+                                        {{ form.address }}
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">Teléfono</label>
+                                        {{ form.phone }}
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">Email</label>
+                                        {{ form.email }}
+                                    </div>
+                                </div>
+                                <div class="col-md-12">
+                                    <div class="mb-3">
+                                        <label class="form-label">Sitio Web</label>
+                                        {{ form.website }}
+                                    </div>
+                                </div>
+                                <div class="col-md-12">
+                                    <div class="mb-3">
+                                        <label class="form-label">Logo</label>
+                                        {{ form.logo }}
+                                        {% if settings.logo %}
+                                        <div class="mt-2">
+                                            <img src="{{ settings.logo.url }}" alt="Logo actual" style="max-height: 100px;">
+                                            <small class="text-muted d-block">Logo actual</small>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Tab Financiero -->
+                        <div class="tab-pane fade" id="financiero">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label class="form-label">Moneda</label>
+                                        {{ form.currency }}
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label class="form-label">Símbolo de Moneda</label>
+                                        {{ form.currency_symbol }}
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label class="form-label">Tasa de IVA</label>
+                                        {{ form.iva_rate }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Tab Recibos -->
+                        <div class="tab-pane fade" id="recibos">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="mb-3">
+                                        <label class="form-label">Pie de página del recibo</label>
+                                        {{ form.receipt_footer }}
+                                        <small class="text-muted">Este texto aparecerá al final de cada recibo</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-12">
+                                    <div class="mb-3">
+                                        <label class="form-label">Mensaje del recibo</label>
+                                        {{ form.receipt_message }}
+                                        <small class="text-muted">Mensaje adicional en el recibo</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3 form-check">
+                                        {{ form.print_auto }}
+                                        <label class="form-check-label">Imprimir recibo automáticamente</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">Número de copias</label>
+                                        {{ form.copies }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Tab Inventario -->
+                        <div class="tab-pane fade" id="inventario">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">Alerta de stock bajo (unidades)</label>
+                                        {{ form.low_stock_alert }}
+                                        <small class="text-muted">Cantidad mínima para mostrar alerta de stock bajo</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <hr>
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-save"></i> Guardar Configuración
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

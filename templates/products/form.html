@@ -1,0 +1,176 @@
+﻿{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}{{ title }} - M&S Melamina{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="card">
+            <div class="card-header">
+                <h4><i class="fas fa-box"></i> {{ title }}</h4>
+            </div>
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    
+                    <!-- Códigos -->
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                            <h6 class="border-bottom pb-2">Códigos</h6>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Nivel 1</label>
+                            <input type="text" name="code_level1" class="form-control" 
+                                   value="{{ product.code_level1|default:'' }}" maxlength="4">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Nivel 2</label>
+                            <input type="text" name="code_level2" class="form-control" 
+                                   value="{{ product.code_level2|default:'' }}" maxlength="4">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Nivel 3</label>
+                            <input type="text" name="code_level3" class="form-control" 
+                                   value="{{ product.code_level3|default:'' }}" maxlength="4">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Nivel 4</label>
+                            <input type="text" name="code_level4" class="form-control" 
+                                   value="{{ product.code_level4|default:'' }}" maxlength="4">
+                        </div>
+                    </div>
+
+                    <!-- Información básica -->
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                            <h6 class="border-bottom pb-2">Información del Producto</h6>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Nombre *</label>
+                            <input type="text" name="name" class="form-control" required 
+                                   value="{{ product.name|default:'' }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Unidad de Medida</label>
+                            <select name="unit" class="form-select">
+                                <option value="Unidad" {% if product.unit == 'Unidad' %}selected{% endif %}>Unidad</option>
+                                <option value="Metro" {% if product.unit == 'Metro' %}selected{% endif %}>Metro</option>
+                                <option value="Kilogramo" {% if product.unit == 'Kilogramo' %}selected{% endif %}>Kilogramo</option>
+                                <option value="Litro" {% if product.unit == 'Litro' %}selected{% endif %}>Litro</option>
+                                <option value="Pliego" {% if product.unit == 'Pliego' %}selected{% endif %}>Pliego</option>
+                            </select>
+                        </div>
+                        <div class="col-md-12">
+                            <label class="form-label">Descripción</label>
+                            <textarea name="description" class="form-control" rows="2">{{ product.description|default:'' }}</textarea>
+                        </div>
+                    </div>
+
+                    <!-- Clasificación -->
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                            <h6 class="border-bottom pb-2">Clasificación</h6>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Grupo</label>
+                            <select name="group" class="form-select">
+                                <option value="">Seleccionar grupo</option>
+                                {% for group in groups %}
+                                <option value="{{ group.id }}" {% if product.group.id == group.id %}selected{% endif %}>
+                                    {{ group.name }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Categoría</label>
+                            <select name="category" class="form-select">
+                                <option value="">Seleccionar categoría</option>
+                                {% for category in categories %}
+                                <option value="{{ category.id }}" {% if product.category.id == category.id %}selected{% endif %}>
+                                    {{ category.name }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Códigos alternativos -->
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                            <h6 class="border-bottom pb-2">Códigos Alternativos</h6>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Código de Barras</label>
+                            <input type="text" name="barcode" class="form-control" 
+                                   value="{{ product.barcode|default:'' }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Código de Fábrica</label>
+                            <input type="text" name="factory_code" class="form-control" 
+                                   value="{{ product.factory_code|default:'' }}">
+                        </div>
+                    </div>
+
+                    <!-- Precios y Stock -->
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                            <h6 class="border-bottom pb-2">Precios y Stock</h6>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Precio Compra</label>
+                            <input type="number" name="purchase_price" class="form-control" step="0.01" 
+                                   value="{{ product.purchase_price|default:'0' }}">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Precio Venta *</label>
+                            <input type="number" name="sale_price" class="form-control" step="0.01" required 
+                                   value="{{ product.sale_price|default:'0' }}">
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Stock Actual</label>
+                            <input type="number" name="current_stock" class="form-control" step="0.01" 
+                                   value="{{ product.current_stock|default:'0' }}">
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Stock Mínimo</label>
+                            <input type="number" name="min_stock" class="form-control" step="0.01" 
+                                   value="{{ product.min_stock|default:'0' }}">
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Stock Máximo</label>
+                            <input type="number" name="max_stock" class="form-control" step="0.01" 
+                                   value="{{ product.max_stock|default:'0' }}">
+                        </div>
+                    </div>
+
+                    <!-- Estado -->
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                            <div class="form-check">
+                                <input type="checkbox" name="is_active" class="form-check-input" id="is_active" 
+                                       {% if product.is_active or not product %}checked{% endif %}>
+                                <label class="form-check-label" for="is_active">Producto Activo</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Botones -->
+                    <div class="row">
+                        <div class="col-md-12">
+                            <hr>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Guardar Producto
+                            </button>
+                            <a href="{% url 'products:list' %}" class="btn btn-secondary">
+                                <i class="fas fa-times"></i> Cancelar
+                            </a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

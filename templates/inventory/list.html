@@ -1,0 +1,138 @@
+﻿{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Inventario - M&S Melamina{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="fas fa-warehouse"></i> Inventario</h1>
+    <div>
+        <a href="{% url 'inventory:entry' %}" class="btn btn-success">
+            <i class="fas fa-plus"></i> Entrada
+        </a>
+        <a href="{% url 'inventory:exit' %}" class="btn btn-danger">
+            <i class="fas fa-minus"></i> Salida
+        </a>
+        <a href="{% url 'inventory:movements' %}" class="btn btn-info">
+            <i class="fas fa-list"></i> Movimientos
+        </a>
+    </div>
+</div>
+
+<!-- 🔥 BUSCADOR DE INVENTARIO -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3" id="search-form">
+            <div class="col-md-4">
+                <select name="warehouse" class="form-select" id="warehouse-filter">
+                    <option value="">Todos los almacenes</option>
+                    {% for w in warehouses %}
+                    <option value="{{ w.id }}" {% if selected_warehouse == w.id|stringformat:"s" %}selected{% endif %}>
+                        {{ w.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-5">
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-search"></i></span>
+                    <input type="text" 
+                           name="search" 
+                           id="search-input"
+                           class="form-control" 
+                           placeholder="Buscar producto por nombre o código..."
+                           value="{{ request.GET.search }}">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="fas fa-search"></i> Buscar
+                </button>
+                <a href="{% url 'inventory:list' %}" class="btn btn-secondary w-100 mt-1">
+                    <i class="fas fa-undo"></i> Limpiar
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Tabla de inventario -->
+<div class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th>Almacén</th>
+                        <th>Producto</th>
+                        <th>Código</th>
+                        <th>Cantidad</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for stock in stocks %}
+                    <tr>
+                        <td>{{ stock.warehouse.name }}</td>
+                        <td>{{ stock.product.name }}</td>
+                        <td>{{ stock.product.barcode|default:"-" }}</td>
+                        <td>
+                            <strong>{{ stock.quantity|floatformat:0 }}</strong>
+                            <small class="text-muted">{{ stock.product.unit }}</small>
+                        </td>
+                        <td>
+                            {% if stock.quantity <= stock.product.min_stock %}
+                                <span class="badge bg-danger">Stock Bajo</span>
+                            {% elif stock.quantity <= stock.product.max_stock|add:"-10" %}
+                                <span class="badge bg-warning">Stock Medio</span>
+                            {% else %}
+                                <span class="badge bg-success">Stock Alto</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="{% url 'inventory:kardex' stock.product.id %}" class="btn btn-sm btn-info" title="Kardex">
+                                <i class="fas fa-book"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center py-4">
+                            <i class="fas fa-box-open fa-3x text-muted mb-3 d-block"></i>
+                            <p class="text-muted">No hay inventario registrado</p>
+                            <a href="{% url 'inventory:entry' %}" class="btn btn-success">
+                                <i class="fas fa-plus"></i> Registrar entrada
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript para búsqueda automática -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('search-input');
+    const warehouseFilter = document.getElementById('warehouse-filter');
+    const searchForm = document.getElementById('search-form');
+    
+    // Búsqueda automática al escribir (con retraso)
+    let timeoutId = null;
+    searchInput.addEventListener('input', function() {
+        clearTimeout(timeoutId);
+        timeoutId = setTimeout(function() {
+            searchForm.submit();
+        }, 500);
+    });
+    
+    // Búsqueda automática al cambiar el almacén
+    warehouseFilter.addEventListener('change', function() {
+        searchForm.submit();
+    });
+});
+</script>
+{% endblock %}

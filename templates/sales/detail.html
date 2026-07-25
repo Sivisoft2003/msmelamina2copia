@@ -1,0 +1,125 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Detalle de Venta - M&S Melamina{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="fas fa-file-invoice"></i> Detalle de Venta</h1>
+    <div>
+        <a href="{% url 'sales:list' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Volver
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5>Información de la Venta</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Número:</strong> {{ sale.sale_number }}</p>
+                        <p><strong>Fecha:</strong> {{ sale.date|date:"d/m/Y H:i" }}</p>
+                        <p><strong>Vendedor:</strong> {{ sale.user.get_full_name|default:sale.user.username }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Cliente:</strong> {{ sale.customer_name|default:"Consumidor Final" }}</p>
+                        <p><strong>NIT/CI:</strong> {{ sale.customer_phone|default:"No registrado" }}</p>
+                        <p><strong>Estado:</strong> 
+                            {% if sale.status == 'COMPLETADA' %}
+                                <span class="badge bg-success">Completada</span>
+                            {% elif sale.status == 'ANULADA' %}
+                                <span class="badge bg-danger">Anulada</span>
+                            {% else %}
+                                <span class="badge bg-warning">Pendiente</span>
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-md-12">
+                        <p><strong>Método de Pago:</strong> {{ sale.get_payment_method_display }}</p>
+                        {% if sale.notes %}
+                        <p><strong>Observaciones:</strong> {{ sale.notes }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5>Totales</h5>
+            </div>
+            <div class="card-body">
+                <div class="row mb-2">
+                    <div class="col-6">Subtotal:</div>
+                    <div class="col-6 text-end">Bs. {{ sale.subtotal|floatformat:2 }}</div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-6">IVA (13%):</div>
+                    <div class="col-6 text-end">Bs. {{ sale.tax|floatformat:2 }}</div>
+                </div>
+                {% if sale.discount > 0 %}
+                <div class="row mb-2">
+                    <div class="col-6">Descuento:</div>
+                    <div class="col-6 text-end text-danger">-Bs. {{ sale.discount|floatformat:2 }}</div>
+                </div>
+                {% endif %}
+                <hr>
+                <div class="row">
+                    <div class="col-6"><strong>TOTAL:</strong></div>
+                    <div class="col-6 text-end"><strong>Bs. {{ sale.total|floatformat:2 }}</strong></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Productos -->
+<div class="card mt-4">
+    <div class="card-header">
+        <h5><i class="fas fa-boxes"></i> Productos</h5>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Producto</th>
+                        <th>Cantidad</th>
+                        <th>Precio Unitario</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for detail in sale.details.all %}
+                    <tr>
+                        <td>{{ detail.product.name }}</td>
+                        <td>{{ detail.quantity }}</td>
+                        <td>Bs. {{ detail.unit_price|floatformat:2 }}</td>
+                        <td><strong>Bs. {{ detail.total|floatformat:2 }}</strong></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="mt-3">
+    <a href="{% url 'sales:recibo' sale.pk %}" class="btn btn-primary" target="_blank">
+        <i class="fas fa-print"></i> Reimprimir Recibo
+    </a>
+    {% if sale.status == 'COMPLETADA' %}
+    <a href="{% url 'sales:cancel' sale.pk %}" class="btn btn-danger">
+        <i class="fas fa-times"></i> Anular Venta
+    </a>
+    {% endif %}
+</div>
+{% endblock %}

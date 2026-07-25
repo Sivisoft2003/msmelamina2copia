@@ -1,0 +1,63 @@
+﻿{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Restaurar Respaldo - M&S Melamina{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-6 mx-auto">
+        <div class="card border-warning">
+            <div class="card-header bg-warning">
+                <h4><i class="fas fa-exclamation-triangle"></i> Restaurar Respaldo</h4>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <strong>¡ADVERTENCIA!</strong>
+                    <p class="mt-2 mb-0">Restaurar este respaldo sobrescribirá la base de datos actual. 
+                    <strong>Esta acción no se puede deshacer.</strong></p>
+                </div>
+                
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <p><strong>Respaldo:</strong> {{ backup.name }}</p>
+                        <p><strong>Fecha:</strong> {{ backup.created_at|date:"d/m/Y H:i" }}</p>
+                        <p><strong>Tamaño:</strong> {{ backup.get_file_size_display }}</p>
+                        <p><strong>Creado por:</strong> {{ backup.created_by.username }}</p>
+                        {% if backup.notes %}
+                        <p><strong>Observaciones:</strong> {{ backup.notes }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label">Confirmar restauración</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="confirm" name="confirm" required>
+                            <label class="form-check-label" for="confirm">
+                                Sí, restaurar este respaldo
+                            </label>
+                        </div>
+                    </div>
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-warning btn-lg" id="restore-btn" disabled>
+                            <i class="fas fa-undo"></i> Restaurar
+                        </button>
+                        <a href="{% url 'backup:list' %}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Cancelar
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('confirm').addEventListener('change', function() {
+    document.getElementById('restore-btn').disabled = !this.checked;
+});
+</script>
+{% endblock %}

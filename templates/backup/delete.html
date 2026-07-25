@@ -1,0 +1,43 @@
+﻿{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Eliminar Respaldo - M&S Melamina{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-6 mx-auto">
+        <div class="card border-danger">
+            <div class="card-header bg-danger text-white">
+                <h4><i class="fas fa-trash"></i> Eliminar Respaldo</h4>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    ¿Estás seguro de eliminar este respaldo?
+                    <p class="mt-2 mb-0">Esta acción no se puede deshacer.</p>
+                </div>
+                
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <p><strong>Respaldo:</strong> {{ backup.name }}</p>
+                        <p><strong>Fecha:</strong> {{ backup.created_at|date:"d/m/Y H:i" }}</p>
+                        <p><strong>Tamaño:</strong> {{ backup.get_file_size_display }}</p>
+                    </div>
+                </div>
+                
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-danger btn-lg">
+                            <i class="fas fa-trash"></i> Eliminar
+                        </button>
+                        <a href="{% url 'backup:list' %}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Cancelar
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

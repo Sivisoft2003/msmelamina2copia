@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Reporte de Productos</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        .header { text-align: center; border-bottom: 2px solid #2C3E50; padding-bottom: 20px; margin-bottom: 20px; }
+        .header h1 { color: #2C3E50; margin: 0; }
+        .header h2 { color: #7F8C8D; font-size: 14px; margin: 5px 0; }
+        .header .company { font-size: 18px; font-weight: bold; color: #2C3E50; }
+        .header .fecha { font-size: 12px; color: #95A5A6; margin-top: 10px; }
+        table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        th { background-color: #2C3E50; color: white; padding: 10px; text-align: left; }
+        td { padding: 8px 10px; border-bottom: 1px solid #ECF0F1; }
+        .stock-bajo { color: #E74C3C; font-weight: bold; }
+        .stock-normal { color: #27AE60; }
+        .footer { text-align: center; margin-top: 30px; font-size: 12px; color: #95A5A6; border-top: 1px solid #ECF0F1; padding-top: 20px; }
+        .resumen { display: flex; justify-content: space-around; margin: 20px 0; }
+        .resumen .card { background: #F8F9FA; padding: 15px 30px; border-radius: 8px; text-align: center; }
+        .resumen .card .number { font-size: 24px; font-weight: bold; color: #2C3E50; }
+        .resumen .card .label { font-size: 12px; color: #7F8C8D; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="company">{{ company.company_name|default:"M&S Melamina" }}</div>
+        <h1>{{ title }}</h1>
+        <div class="fecha">Generado: {{ fecha_generacion }}</div>
+    </div>
+
+    <div class="resumen">
+        <div class="card">
+            <div class="number">{{ total_productos }}</div>
+            <div class="label">Total Productos</div>
+        </div>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Producto</th>
+                <th>Código</th>
+                <th>Categoría</th>
+                <th style="text-align:right;">Precio Venta</th>
+                <th style="text-align:center;">Stock</th>
+                <th>Estado</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for product in products %}
+            <tr>
+                <td>{{ product.name }}</td>
+                <td>{{ product.barcode|default:"-" }}</td>
+                <td>{{ product.category.name|default:"Sin categoría" }}</td>
+                <td style="text-align:right;">Bs. {{ product.sale_price|floatformat:2 }}</td>
+                <td style="text-align:center;">
+                    <span class="{% if product.current_stock <= product.min_stock %}stock-bajo{% else %}stock-normal{% endif %}">
+                        {{ product.current_stok|floatformat:0 }}
+                    </span>
+                </td>
+                <td>{% if product.is_active %}Activo{% else %}Inactivo{% endif %}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="footer">
+        {{ company.receipt_footer|default:"¡Gracias por usar nuestro sistema!" }}
+    </div>
+</body>
+</html>

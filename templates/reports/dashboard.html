@@ -1,0 +1,80 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Reportes - M&S Tools{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="fas fa-file-alt"></i> Reportes</h1>
+    <a href="{% url 'core:dashboard' %}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Volver al Dashboard
+    </a>
+</div>
+<hr>
+
+<div class="row g-4 justify-content-center">
+    <!-- Reporte de Ventas -->
+    <div class="col-md-6 col-lg-3">
+        <div class="card text-center h-100 shadow-sm">
+            <div class="card-body d-flex flex-column">
+                <div class="mb-3">
+                    <i class="fas fa-chart-bar fa-3x text-primary"></i>
+                </div>
+                <h5 class="card-title">Reporte de Ventas</h5>
+                <p class="card-text text-muted flex-grow-1">Ventas por período, estadísticas diarias</p>
+                <a href="{% url 'reports:sales' %}" class="btn btn-primary mt-2">
+                    <i class="fas fa-arrow-right"></i> Ver Reporte
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rendimiento de Vendedores -->
+    <div class="col-md-6 col-lg-3">
+        <div class="card text-center h-100 shadow-sm">
+            <div class="card-body d-flex flex-column">
+                <div class="mb-3">
+                    <i class="fas fa-users fa-3x" style="color: #F5A623;"></i>
+                </div>
+                <h5 class="card-title">Rendimiento de Vendedores</h5>
+                <p class="card-text text-muted flex-grow-1">Ventas por vendedor, ranking, productividad</p>
+                <a href="{% url 'reports:vendedores' %}" class="btn btn-warning mt-2" style="color: #fff;">
+                    <i class="fas fa-arrow-right"></i> Ver Reporte
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Productos Más Vendidos -->
+    <div class="col-md-6 col-lg-3">
+        <div class="card text-center h-100 shadow-sm">
+            <div class="card-body d-flex flex-column">
+                <div class="mb-3">
+                    <i class="fas fa-trophy fa-3x" style="color: #F5A623;"></i>
+                </div>
+                <h5 class="card-title">Productos Más Vendidos</h5>
+                <p class="card-text text-muted flex-grow-1">Top productos, stock bajo</p>
+                <a href="{% url 'reports:products' %}" class="btn btn-warning mt-2" style="color: #fff;">
+                    <i class="fas fa-arrow-right"></i> Ver Reporte
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Inventario Valorado -->
+    <div class="col-md-6 col-lg-3">
+        <div class="card text-center h-100 shadow-sm">
+            <div class="card-body d-flex flex-column">
+                <div class="mb-3">
+                    <i class="fas fa-warehouse fa-3x text-success"></i>
+                </div>
+                <h5 class="card-title">Inventario Valorado</h5>
+                <p class="card-text text-muted flex-grow-1">Valor del inventario, resumen por almacén</p>
+                <a href="{% url 'reports:inventory' %}" class="btn btn-success mt-2">
+                    <i class="fas fa-arrow-right"></i> Ver Reporte
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

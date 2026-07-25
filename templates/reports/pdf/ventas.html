@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Reporte de Ventas</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        .header { text-align: center; border-bottom: 2px solid #2C3E50; padding-bottom: 20px; margin-bottom: 20px; }
+        .header h1 { color: #2C3E50; margin: 0; }
+        .header h2 { color: #7F8C8D; font-size: 14px; margin: 5px 0; }
+        .header .company { font-size: 18px; font-weight: bold; color: #2C3E50; }
+        .header .nit { font-size: 12px; color: #7F8C8D; }
+        .header .fecha { font-size: 12px; color: #95A5A6; margin-top: 10px; }
+        table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        th { background-color: #2C3E50; color: white; padding: 10px; text-align: left; }
+        td { padding: 8px 10px; border-bottom: 1px solid #ECF0F1; }
+        .total-row { font-weight: bold; background-color: #F8F9FA; }
+        .total-row td { border-top: 2px solid #2C3E50; }
+        .footer { text-align: center; margin-top: 30px; font-size: 12px; color: #95A5A6; border-top: 1px solid #ECF0F1; padding-top: 20px; }
+        .resumen { display: flex; justify-content: space-around; margin: 20px 0; }
+        .resumen .card { background: #F8F9FA; padding: 15px 30px; border-radius: 8px; text-align: center; }
+        .resumen .card .number { font-size: 24px; font-weight: bold; color: #2C3E50; }
+        .resumen .card .label { font-size: 12px; color: #7F8C8D; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="company">{{ company.company_name|default:"M&S Melamina" }}</div>
+        <div class="nit">NIT: {{ company.nit|default:"123456789" }}</div>
+        <h1>{{ title }}</h1>
+        {% if fecha_desde or fecha_hasta %}
+        <div class="fecha">Período: {% if fecha_desde %}Desde: {{ fecha_desde }}{% endif %} {% if fecha_hasta %}Hasta: {{ fecha_hasta }}{% endif %}</div>
+        {% endif %}
+        <div class="fecha">Generado: {{ fecha_generacion }}</div>
+    </div>
+
+    <div class="resumen">
+        <div class="card">
+            <div class="number">{{ sales|length }}</div>
+            <div class="label">Total Ventas</div>
+        </div>
+        <div class="card">
+            <div class="number">Bs. {{ total_monto|floatformat:2 }}</div>
+            <div class="label">Monto Total</div>
+        </div>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>N° Venta</th>
+                <th>Fecha</th>
+                <th>Cliente</th>
+                <th>Vendedor</th>
+                <th style="text-align:right;">Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for sale in sales %}
+            <tr>
+                <td>{{ sale.sale_number }}</td>
+                <td>{{ sale.date|date:"d/m/Y H:i" }}</td>
+                <td>{{ sale.customer_name|default:"Consumidor Final" }}</td>
+                <td>{{ sale.user.username }}</td>
+                <td style="text-align:right;">Bs. {{ sale.total|floatformat:2 }}</td>
+            </tr>
+            {% endfor %}
+            <tr class="total-row">
+                <td colspan="4" style="text-align:right;">TOTAL</td>
+                <td style="text-align:right;">Bs. {{ total_monto|floatformat:2 }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="footer">
+        {{ company.receipt_footer|default:"¡Gracias por usar nuestro sistema!" }}
+    </div>
+</body>
+</html>

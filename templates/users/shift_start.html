@@ -1,0 +1,55 @@
+﻿{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Iniciar Turno - M&S Melamina{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-6 mx-auto">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h4><i class="fas fa-play"></i> Iniciar Turno</h4>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Tipo de Turno *</label>
+                        <select name="shift_type" class="form-select" required>
+                            <option value="">Seleccionar...</option>
+                            <option value="MORNING">Turno Mañana (08:00 - 13:00)</option>
+                            <option value="AFTERNOON">Turno Tarde (14:00 - 20:00)</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Efectivo Inicial</label>
+                        <input type="number" name="initial_cash" class="form-control" step="0.01" value="0">
+                        <small class="text-muted">Monto en efectivo con el que inicias el turno</small>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Observaciones</label>
+                        <textarea name="notes" class="form-control" rows="2" placeholder="Observaciones del turno..."></textarea>
+                    </div>
+                    
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i>
+                        Al iniciar turno, podrás registrar ventas y movimientos de inventario.
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-success btn-lg">
+                            <i class="fas fa-play"></i> Iniciar Turno
+                        </button>
+                        <a href="{% url 'users:shift_dashboard' %}" class="btn btn-secondary">
+                            <i class="fas fa-times"></i> Cancelar
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
