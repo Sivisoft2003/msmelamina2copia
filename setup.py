@@ -1,0 +1,21 @@
+from setuptools import setup, find_packages
+
+setup(
+    name='msmelamina2copia',
+    version='1.0.0',
+    packages=find_packages(),
+    include_package_data=True,
+    install_requires=[
+        'Django==5.0.6',
+        'django-htmx==1.17.2',
+        'django-crispy-forms==2.1',
+        'crispy-bootstrap5==0.7',
+        'Pillow==10.3.0',
+        'reportlab==4.2.0',
+        'django-filter==24.2',
+        'python-decouple==3.8',
+        'openpyxl==3.1.2',
+        'whitenoise==6.6.0',
+        'gunicorn==21.2.0',
+    ],
+)
