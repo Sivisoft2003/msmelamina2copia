@@ -30,3 +30,9 @@ EXPOSE 8000
 
 # Comando para iniciar la aplicación
 CMD ["gunicorn", "config.wsgi:application", "--bind", "0.0.0.0:8000"]
+
+# Crear superusuario automáticamente
+RUN python create_superuser.py
+
+# Comando de inicio
+CMD ["gunicorn", "config.wsgi:application", "--bind", "0.0.0.0:8000"]
