@@ -311,8 +311,9 @@
             <!-- Logo -->
             <div class="logo-container">
                 <div class="logo-circle">
-    <img src="/media/logos/logo_redondo.png" alt="M&S Tools" style="width: 65px; height: 65px; object-fit: contain; border-radius: 50%;">
-</div>
+                    {% load static %}
+                    <img src="/media/logos/logo_redondo.png" alt="M&S Tools" onerror="this.style.display='none'; this.parentElement.innerHTML = '<i class=\'fas fa-tools\'></i>';">
+                </div>
                 <div class="logo-text">M&S <span>TOOLS</span></div>
                 <div class="logo-subtitle">Innovación en herramientas y accesorios</div>
             </div>
